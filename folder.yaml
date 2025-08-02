@@ -1,0 +1,67 @@
+community-website/
+│
+├── app/                       # Next.js App Router structure (no src/)
+│   ├── layout.tsx             # Root layout
+│   ├── page.tsx               # Landing Page (Home)
+│
+│   ├── login/                 # User login page
+│   │   └── page.tsx
+│
+│   ├── signup/                # User signup page
+│   │   └── page.tsx
+│
+│   ├── admin/                 # Admin routes
+│   │   ├── login/             # Admin login
+│   │   │   └── page.tsx
+│   │   ├── dashboard/         # Admin dashboard
+│   │   │   └── page.tsx
+│   │   └── layout.tsx         # Admin layout (optional)
+│
+│   ├── matrimonial/           # Matrimonial section
+│   │   ├── list/              # List profiles
+│   │   │   └── page.tsx
+│   │   ├── profile/           # View individual profile
+│   │   │   └── [id]/page.tsx
+│   │   ├── create/            # Create new profile
+│   │   │   └── page.tsx
+│   │   └── layout.tsx         # Matrimonial layout (optional)
+│
+│   └── services/                   # API routes
+│       ├── auth/              # Auth APIs
+│       │   ├── login.ts
+│       │   ├── signup.ts
+│       │   └── adminLogin.ts
+│       └── matrimonial/       # Matrimonial APIs
+│           ├── create.ts
+│           ├── list.ts
+│           └── [id].ts
+│
+├── components/                # Reusable React components
+│   ├── Navbar.tsx
+│   ├── Footer.tsx
+│   ├── MatrimonialCard.tsx
+│   └── InputField.tsx
+│
+├── styles/                    # CSS or Tailwind styles
+│   ├── globals.css
+│   └── matrimonial.module.css
+│
+├── utils/                     # Utility functions
+│   ├── auth.ts
+│   └── validateForm.ts
+│
+├── context/                   # React context providers
+│   └── AuthContext.tsx
+│
+├── types/                     # TypeScript types and interfaces
+│   ├── user.ts
+│   └── matrimonial.ts
+│
+├── public/                    # Static files (images, etc.)
+│   └── logo.png
+│
+├── .env.local                 # Environment variables
+├── next.config.js             # Next.js config
+├── tailwind.config.js         # Tailwind CSS config (optional)
+├── tsconfig.json              # TypeScript config
+└── package.json
