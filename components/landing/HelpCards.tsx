@@ -46,7 +46,7 @@ const HelpCards : React.FC = () => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push('/help');
+    router.push('/helpFrom');
   };
 
   return (

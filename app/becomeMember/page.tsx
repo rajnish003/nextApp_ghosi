@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { ChangeEvent, FormEvent, useState } from "react";
+import { useMemberFormStore } from "@/_zustand/memberFormStrore";
 
 interface FormData {
   fullName: string;
@@ -32,7 +33,149 @@ interface RadioGroupProps {
   required?: boolean;
 }
 
-const RadioGroup: React.FC<RadioGroupProps> = ({ label, name, options, value, onChange, required }) => (
+// Translations dictionary
+const translations = {
+  en: {
+    title: "Join Our Community",
+    subtitle: "Fill out the form below to become a member",
+    header: "Membership Application",
+    headerNote: "Please provide your details accurately",
+
+    section1: "Personal Information",
+    fullName: "Full Name",
+    dob: "Date of Birth / Age",
+    area: "Area of Residence",
+    areaOptions: ["Rural", "Urban", "Semi-Urban"],
+    district: "District",
+    pinCode: "Pin Code",
+    state: "State",
+    country: "Country",
+
+    section2: "Educational & Occupational Details",
+    education: "Highest Education Qualification",
+    educationOptions: [
+      "No Formal Education",
+      "Primary (Up to Class 5)",
+      "Secondary (Class 6-10)",
+      "Higher Secondary (Class 11-12)",
+      "Diploma",
+      "Undergraduate",
+      "Postgraduate",
+      "Doctorate (PhD)",
+      "Other",
+    ],
+    otherEducation: "Specify Other Education",
+    occupation: "Occupation",
+    occupationOptions: [
+      "Dairy Farming",
+      "Agriculture",
+      "Business",
+      "Government Job",
+      "Private Job",
+      "Doctor",
+      "Chartered Accountant (CA)",
+      "Engineer",
+      "Government Administrative Services",
+      "Other",
+    ],
+    otherOccupation: "Specify Other Occupation",
+
+    section3: "Contact Details",
+    mobile: "Mobile Number",
+    email: "Email Address",
+
+    section4: "Family & Social Engagement",
+    marital: "Marital Status",
+    maritalOptions: ["Married", "Unmarried", "Divorced"],
+    familyMembers: "Number of Family Members",
+    volunteer: "Would you like to volunteer for community service?",
+    volunteerOptions: ["Yes", "No"],
+    volunteerSkills: "Area of interest or skills",
+
+    section5: "Additional Information",
+    additional: "Suggestions, comments, or other details",
+
+    submit: "Submit Application",
+    processing: "Processing...",
+    success: "Your application has been submitted successfully.",
+    privacy: "We respect your privacy. Your information will not be shared with third parties.",
+  },
+
+  hi: {
+    title: "हमारे समुदाय से जुड़ें",
+    subtitle: "सदस्य बनने के लिए नीचे दिया गया फॉर्म भरें",
+    header: "सदस्यता आवेदन",
+    headerNote: "कृपया अपनी जानकारी सही-सही भरें",
+
+    section1: "व्यक्तिगत जानकारी",
+    fullName: "पूरा नाम",
+    dob: "जन्म तिथि / आयु",
+    area: "निवास क्षेत्र",
+    areaOptions: ["ग्रामीण", "शहरी", "अर्ध-शहरी"],
+    district: "जिला",
+    pinCode: "पिन कोड",
+    state: "राज्य",
+    country: "देश",
+
+    section2: "शैक्षिक और व्यावसायिक विवरण",
+    education: "उच्चतम शैक्षिक योग्यता",
+    educationOptions: [
+      "कोई औपचारिक शिक्षा नहीं",
+      "प्राथमिक (कक्षा 5 तक)",
+      "माध्यमिक (कक्षा 6-10)",
+      "उच्च माध्यमिक (कक्षा 11-12)",
+      "डिप्लोमा",
+      "स्नातक",
+      "स्नातकोत्तर",
+      "डॉक्टरेट (PhD)",
+      "अन्य",
+    ],
+    otherEducation: "अन्य शिक्षा निर्दिष्ट करें",
+    occupation: "व्यवसाय",
+    occupationOptions: [
+      "डेयरी",
+      "कृषि",
+      "व्यवसाय",
+      "सरकारी नौकरी",
+      "निजी नौकरी",
+      "डॉक्टर",
+      "चार्टर्ड अकाउंटेंट (CA)",
+      "इंजीनियर",
+      "प्रशासनिक सेवा",
+      "अन्य",
+    ],
+    otherOccupation: "अन्य व्यवसाय निर्दिष्ट करें",
+
+    section3: "संपर्क विवरण",
+    mobile: "मोबाइल नंबर",
+    email: "ईमेल पता",
+
+    section4: "परिवार और सामाजिक सहभागिता",
+    marital: "वैवाहिक स्थिति",
+    maritalOptions: ["विवाहित", "अविवाहित", "तलाकशुदा"],
+    familyMembers: "परिवार के सदस्यों की संख्या",
+    volunteer: "क्या आप सामुदायिक सेवा के लिए स्वयंसेवा करना चाहेंगे?",
+    volunteerOptions: ["हाँ", "नहीं"],
+    volunteerSkills: "रुचि का क्षेत्र या कौशल",
+
+    section5: "अतिरिक्त जानकारी",
+    additional: "सुझाव, टिप्पणियाँ या अन्य विवरण",
+
+    submit: "आवेदन जमा करें",
+    processing: "प्रक्रिया हो रही है...",
+    success: "आपका आवेदन सफलतापूर्वक जमा कर दिया गया है।",
+    privacy: "हम आपकी गोपनीयता का सम्मान करते हैं। आपकी जानकारी किसी तीसरे पक्ष के साथ साझा नहीं की जाएगी।",
+  },
+};
+
+const RadioGroup: React.FC<RadioGroupProps> = ({
+  label,
+  name,
+  options,
+  value,
+  onChange,
+  required,
+}) => (
   <div className="space-y-1">
     <label className="block text-sm font-medium text-gray-700">
       {label} {required && <span className="text-red-500">*</span>}
@@ -57,475 +200,324 @@ const RadioGroup: React.FC<RadioGroupProps> = ({ label, name, options, value, on
 );
 
 const MemberPage: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    fullName: '',
-    dobAge: '',
-    area: '',
-    district: '',
-    pinCode: '',
-    state: '',
-    country: '',
-    education: '',
-    educationOther: '',
-    occupation: '',
-    occupationOther: '',
-    mobile: '',
-    email: '',
-    maritalStatus: '',
-    familyMembers: '',
-    volunteer: '',
-    volunteerSkills: '',
-    additionalInfo: '',
-  });
+  const { formData, loading, error, success, updateField, submitForm } =
+    useMemberFormStore();
 
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
-
-  const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof FormData, string>> = {};
-
-    if (!formData.fullName.trim()) newErrors.fullName = 'Full Name is required';
-    if (!formData.dobAge.trim()) newErrors.dobAge = 'Date of Birth / Age is required';
-    if (!formData.area) newErrors.area = 'Area of Residence is required';
-    if (!formData.education) newErrors.education = 'Education is required';
-    if (formData.education === 'Other' && !formData.educationOther.trim())
-      newErrors.educationOther = 'Please specify other education';
-    if (!formData.occupation) newErrors.occupation = 'Occupation is required';
-    if (formData.occupation === 'Other' && !formData.occupationOther.trim())
-      newErrors.occupationOther = 'Please specify other occupation';
-    if (!formData.mobile.trim()) newErrors.mobile = 'Mobile Number is required';
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = 'Invalid email address';
-    if (formData.pinCode && !/^\d{6}$/.test(formData.pinCode))
-      newErrors.pinCode = 'Pin Code must be 6 digits';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const [lang, setLang] = useState<"en" | "hi">("en");
+  const t = translations[lang];
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error for the field being edited
-    setErrors((prev) => ({ ...prev, [name]: '' }));
+    updateField(name as keyof FormData, value);
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Form submitted:', {
-        ...formData,
-        education: formData.education === 'Other' ? formData.educationOther : formData.education,
-        occupation: formData.occupation === 'Other' ? formData.occupationOther : formData.occupation,
-      });
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-
-      setTimeout(() => {
-        setSubmitSuccess(false);
-        setFormData({
-          fullName: '',
-          dobAge: '',
-          area: '',
-          district: '',
-          pinCode: '',
-          state: '',
-          country: '',
-          education: '',
-          educationOther: '',
-          occupation: '',
-          occupationOther: '',
-          mobile: '',
-          email: '',
-          maritalStatus: '',
-          familyMembers: '',
-          volunteer: '',
-          volunteerSkills: '',
-          additionalInfo: '',
-        });
-      }, 3000);
-    }, 1500);
+    await submitForm();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-green-500 mb-2">Join Our Community</h1>
-          <p className="text-lg text-green-600">Fill out the form below to become a member</p>
+        {/* ✅ Language Switcher */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setLang("en")}
+            type="button"
+            className={`px-3 py-1 rounded-l-lg ${
+              lang === "en" ? "bg-green-600 text-white" : "bg-gray-200"
+            }`}
+          >
+            English
+          </button>
+          <button
+            onClick={() => setLang("hi")}
+            type="button"
+            className={`px-3 py-1 rounded-r-lg ${
+              lang === "hi" ? "bg-green-600 text-white" : "bg-gray-200"
+            }`}
+          >
+            हिन्दी
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-green-500 mb-2">{t.title}</h1>
+          <p className="text-lg text-green-600">{t.subtitle}</p>
+        </div>
+
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl"
+        >
           <div className="bg-green-500 text-white p-6">
-            <h2 className="text-2xl font-bold">Membership Application</h2>
-            <p className="text-green-100">Please provide your details accurately</p>
+            <h2 className="text-2xl font-bold">{t.header}</h2>
+            <p className="text-green-100">{t.headerNote}</p>
           </div>
 
           <div className="p-6 space-y-8">
-            {/* Personal Information */}
+            {/* Error */}
+            {error && (
+              <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                role="alert"
+              >
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
+
+            {/* Section 1 */}
             <div className="space-y-6">
               <div className="border-b border-gray-200 pb-4">
                 <h3 className="text-xl font-semibold text-green-500 flex items-center">
-                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">1</span>
-                  Personal Information
+                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    1
+                  </span>
+                  {t.section1}
                 </h3>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-                    Full Name <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t.fullName} <span className="text-red-500">*</span>
                   </label>
                   <input
-                    id="fullName"
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleChange}
                     required
-                    aria-required="true"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
                   />
-                  {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="dobAge" className="block text-sm font-medium text-gray-700">
-                    Date of Birth / Age <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t.dob} <span className="text-red-500">*</span>
                   </label>
                   <input
-                    id="dobAge"
                     name="dobAge"
                     value={formData.dobAge}
                     onChange={handleChange}
                     required
-                    aria-required="true"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
                   />
-                  {errors.dobAge && <p className="text-red-500 text-sm">{errors.dobAge}</p>}
                 </div>
 
                 <RadioGroup
-                  label="Area of Residence"
+                  label={t.area}
                   name="area"
-                  options={['Rural', 'Urban', 'Semi-Urban']}
+                  options={t.areaOptions}
                   value={formData.area}
                   onChange={handleChange}
                   required
                 />
-                {errors.area && <p className="text-red-500 text-sm">{errors.area}</p>}
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="space-y-1">
-                    <label htmlFor="district" className="block text-sm font-medium text-gray-700">District</label>
-                    <input
-                      id="district"
-                      name="district"
-                      value={formData.district}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label htmlFor="pinCode" className="block text-sm font-medium text-gray-700">Pin Code</label>
-                    <input
-                      id="pinCode"
-                      name="pinCode"
-                      value={formData.pinCode}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
-                    />
-                    {errors.pinCode && <p className="text-red-500 text-sm">{errors.pinCode}</p>}
-                  </div>
-
-                  <div className="space-y-1">
-                    <label htmlFor="state" className="block text-sm font-medium text-gray-700">State</label>
-                    <input
-                      id="state"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
-                    <input
-                      id="country"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Education & Occupation Section */}
-            <div className="space-y-6">
-              <div className="border-b border-gray-200 pb-4">
-                <h3 className="text-xl font-semibold text-green-500 flex items-center">
-                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">2</span>
-                  Educational & Occupational Details
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <RadioGroup
-                    label="Highest Education Qualification"
-                    name="education"
-                    options={[
-                      'No Formal Education',
-                      'Primary (Up to Class 5)',
-                      'Secondary (Class 6-10)',
-                      'Higher Secondary (Class 11-12)',
-                      'Diploma',
-                      'Undergraduate',
-                      'Postgraduate',
-                      'Doctorate (PhD)',
-                      'Other',
-                    ]}
-                    value={formData.education}
-                    onChange={handleChange}
-                    required
-                  />
-                  {errors.education && <p className="text-red-500 text-sm">{errors.education}</p>}
-                  {formData.education === 'Other' && (
-                    <div className="mt-3">
-                      <label htmlFor="educationOther" className="block text-sm font-medium text-gray-700">
-                        Specify Other Education
-                      </label>
-                      <input
-                        id="educationOther"
-                        name="educationOther"
-                        value={formData.educationOther}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                      />
-                      {errors.educationOther && <p className="text-red-500 text-sm">{errors.educationOther}</p>}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <RadioGroup
-                    label="Occupation"
-                    name="occupation"
-                    options={[
-                      'Dairy Farming',
-                      'Agriculture',
-                      'Business',
-                      'Government Job',
-                      'Private Job',
-                      'Doctor',
-                      'Chartered Accountant (CA)',
-                      'Engineer',
-                      'Government Administrative Services',
-                      'Other',
-                    ]}
-                    value={formData.occupation}
-                    onChange={handleChange}
-                    required
-                  />
-                  {errors.occupation && <p className="text-red-500 text-sm">{errors.occupation}</p>}
-                  {formData.occupation === 'Other' && (
-                    <div className="mt-3">
-                      <label htmlFor="occupationOther" className="block text-sm font-medium text-gray-700">
-                        Specify Other Occupation
-                      </label>
-                      <input
-                        id="occupationOther"
-                        name="occupationOther"
-                        value={formData.occupationOther}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                      />
-                      {errors.occupationOther && <p className="text-red-500 text-sm">{errors.occupationOther}</p>}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Details Section */}
-            <div className="space-y-6">
-              <div className="border-b border-gray-200 pb-4">
-                <h3 className="text-xl font-semibold text-green-500 flex items-center">
-                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">3</span>
-                  Contact Details
-                </h3>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <label htmlFor="mobile" className="block text-sm font-medium text-gray-700">
-                    Mobile Number <span className="text-red-500">*</span>
-                  </label>
                   <input
-                    id="mobile"
-                    name="mobile"
-                    value={formData.mobile}
+                    name="district"
+                    placeholder={t.district}
+                    value={formData.district}
                     onChange={handleChange}
-                    type="tel"
-                    required
-                    aria-required="true"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
+                    className="mt-1 block w-full border rounded-md py-2 px-3"
                   />
-                  {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile}</p>}
-                </div>
-
-                <div className="space-y-1">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
                   <input
-                    id="email"
-                    name="email"
-                    value={formData.email}
+                    name="pinCode"
+                    placeholder={t.pinCode}
+                    value={formData.pinCode}
                     onChange={handleChange}
-                    type="email"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
+                    className="mt-1 block w-full border rounded-md py-2 px-3"
                   />
-                  {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                  <input
+                    name="state"
+                    placeholder={t.state}
+                    value={formData.state}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border rounded-md py-2 px-3"
+                  />
+                  <input
+                    name="country"
+                    placeholder={t.country}
+                    value={formData.country}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border rounded-md py-2 px-3"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Family & Social Engagement Section */}
+            {/* Section 2 */}
             <div className="space-y-6">
               <div className="border-b border-gray-200 pb-4">
                 <h3 className="text-xl font-semibold text-green-500 flex items-center">
-                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">4</span>
-                  Family & Social Engagement
+                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    2
+                  </span>
+                  {t.section2}
                 </h3>
               </div>
 
               <div className="space-y-4">
                 <RadioGroup
-                  label="Marital Status"
-                  name="maritalStatus"
-                  options={['Married', 'Unmarried', 'Divorced']}
-                  value={formData.maritalStatus}
+                  label={t.education}
+                  name="education"
+                  options={t.educationOptions}
+                  value={formData.education}
                   onChange={handleChange}
+                  required
                 />
-
-                <div className="space-y-1">
-                  <label htmlFor="familyMembers" className="block text-sm font-medium text-gray-700">
-                    Number of Family Members
-                  </label>
+                {formData.education === "Other" && (
                   <input
-                    id="familyMembers"
-                    name="familyMembers"
-                    value={formData.familyMembers}
+                    name="educationOther"
+                    placeholder={t.otherEducation}
+                    value={formData.educationOther}
                     onChange={handleChange}
-                    type="number"
-                    min="1"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
+                    className="mt-1 block w-full border rounded-md py-2 px-3"
                   />
-                </div>
+                )}
 
-                <div>
-                  <RadioGroup
-                    label="Would you like to volunteer for community service?"
-                    name="volunteer"
-                    options={['Yes', 'No']}
-                    value={formData.volunteer}
+                <RadioGroup
+                  label={t.occupation}
+                  name="occupation"
+                  options={t.occupationOptions}
+                  value={formData.occupation}
+                  onChange={handleChange}
+                  required
+                />
+                {formData.occupation === "Other" && (
+                  <input
+                    name="occupationOther"
+                    placeholder={t.otherOccupation}
+                    value={formData.occupationOther}
                     onChange={handleChange}
+                    className="mt-1 block w-full border rounded-md py-2 px-3"
                   />
-                  {formData.volunteer === 'Yes' && (
-                    <div className="mt-3">
-                      <label htmlFor="volunteerSkills" className="block text-sm font-medium text-gray-700">
-                        Area of interest or skills
-                      </label>
-                      <textarea
-                        id="volunteerSkills"
-                        name="volunteerSkills"
-                        value={formData.volunteerSkills}
-                        onChange={handleChange}
-                        rows={3}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
-                      />
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             </div>
 
-            {/* Additional Information Section */}
+            {/* Section 3 */}
             <div className="space-y-6">
               <div className="border-b border-gray-200 pb-4">
                 <h3 className="text-xl font-semibold text-green-500 flex items-center">
-                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">5</span>
-                  Additional Information
+                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    3
+                  </span>
+                  {t.section3}
                 </h3>
               </div>
 
-              <div className="space-y-1">
-                <label htmlFor="additionalInfo" className="block text-sm font-medium text-gray-700">
-                  Suggestions, comments, or other details
-                </label>
-                <textarea
-                  id="additionalInfo"
-                  name="additionalInfo"
-                  value={formData.additionalInfo}
+              <div className="grid md:grid-cols-2 gap-6">
+                <input
+                  name="mobile"
+                  placeholder={t.mobile}
+                  value={formData.mobile}
                   onChange={handleChange}
-                  rows={4}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 transition duration-150"
+                  required
+                  className="mt-1 block w-full border rounded-md py-2 px-3"
+                />
+                <input
+                  name="email"
+                  placeholder={t.email}
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md py-2 px-3"
                 />
               </div>
             </div>
 
+            {/* Section 4 */}
+            <div className="space-y-6">
+              <div className="border-b border-gray-200 pb-4">
+                <h3 className="text-xl font-semibold text-green-500 flex items-center">
+                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    4
+                  </span>
+                  {t.section4}
+                </h3>
+              </div>
+
+              <RadioGroup
+                label={t.marital}
+                name="maritalStatus"
+                options={t.maritalOptions}
+                value={formData.maritalStatus}
+                onChange={handleChange}
+              />
+
+              <input
+                name="familyMembers"
+                placeholder={t.familyMembers}
+                value={formData.familyMembers}
+                onChange={handleChange}
+                className="mt-1 block w-full border rounded-md py-2 px-3"
+              />
+
+              <RadioGroup
+                label={t.volunteer}
+                name="volunteer"
+                options={t.volunteerOptions}
+                value={formData.volunteer}
+                onChange={handleChange}
+              />
+              {formData.volunteer === "Yes" && (
+                <textarea
+                  name="volunteerSkills"
+                  placeholder={t.volunteerSkills}
+                  value={formData.volunteerSkills}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md py-2 px-3"
+                />
+              )}
+            </div>
+
+            {/* Section 5 */}
+            <div className="space-y-6">
+              <div className="border-b border-gray-200 pb-4">
+                <h3 className="text-xl font-semibold text-green-500 flex items-center">
+                  <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    5
+                  </span>
+                  {t.section5}
+                </h3>
+              </div>
+              <textarea
+                name="additionalInfo"
+                placeholder={t.additional}
+                value={formData.additionalInfo}
+                onChange={handleChange}
+                className="mt-1 block w-full border rounded-md py-2 px-3"
+              />
+            </div>
+
+            {/* Submit */}
             <div className="pt-6">
-              {submitSuccess ? (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                  <strong className="font-bold">Success! </strong>
-                  <span className="block sm:inline">Your application has been submitted successfully.</span>
+              {success ? (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                  {t.success}
                 </div>
               ) : (
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  disabled={loading}
+                  className={`w-full flex justify-center py-3 px-4 rounded-md text-lg font-medium text-white bg-green-600 hover:bg-green-700 ${
+                    loading ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
                 >
-                  {isSubmitting ? (
-                    <>
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Processing...
-                    </>
-                  ) : (
-                    'Submit Application'
-                  )}
+                  {loading ? t.processing : t.submit}
                 </button>
               )}
             </div>
           </div>
         </form>
 
+        {/* Privacy */}
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>We respect your privacy. Your information will not be shared with third parties.</p>
+          <p>{t.privacy}</p>
         </div>
       </div>
     </div>

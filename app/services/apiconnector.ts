@@ -1,22 +1,34 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from "axios";
+// apiconnector.ts
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { BASE_URL } from "./apis";
 
-export const axiosInstance: AxiosInstance = axios.create({});
+// Axios instance
+const api: AxiosInstance = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-export const apiConnector = <T = unknown>( // Added generic type T for the response data
-  method: Method,
-  url: string,
-  bodyData?: Record<string, unknown> | FormData, // More specific for bodyData
-  headers?: Record<string, string>, // More specific for headers
-  params?: Record<string, string | number | boolean> // More specific for params
-): Promise<AxiosResponse<T>> => { // Use generic T for AxiosResponse
-  const config: AxiosRequestConfig = {
-    method: method,
-    url: url,
-    // Use undefined instead of null for better Axios defaults
-    data: bodyData, 
-    headers: headers,
-    params: params,
-  };
+// Interceptor for attaching token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-  return axiosInstance(config);
+export const apiConnector = {
+  get: <T>(url: string, config?: AxiosRequestConfig) =>
+    api.get<T>(url, config),
+  post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    api.post<T>(url, data, config),
+  put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    api.put<T>(url, data, config),
+  delete: <T>(url: string, config?: AxiosRequestConfig) =>
+    api.delete<T>(url, config),
 };
+
+export default api;

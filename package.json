@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+     "dev": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
     "start": "next start",
     "postinstall": "flowbite-react patch"
@@ -20,6 +20,7 @@
     "dotenv": "^17.2.0",
     "embla-carousel-react": "^8.6.0",
     "flowbite-react": "^0.11.8",
+    "jose": "^6.0.12",
     "lucide-react": "^0.519.0",
     "middleware": "^1.0.0",
     "next": "15.3.3",

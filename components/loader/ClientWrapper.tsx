@@ -1,30 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import HandshakeLoader from "./HandShakeLoader";
+import { useLoading } from "../ui/LoadingProvider";
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, stopLoading } = useLoading();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    setIsLoading(true);
+    // Stop loading when pathname changes (navigation complete)
     const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);  // Adjust duration here
+      stopLoading();
+    }, 100); // Small delay to ensure smooth transition
 
     return () => clearTimeout(timer);
-  }, [pathname, searchParams]);
+  }, [pathname, stopLoading]);
 
-  return (
-    <>
-      {isLoading ? (
-        <HandshakeLoader/>
-      ) : (
-        <>{children}</>
-      )}
-    </>
-  );
+  return isLoading ? <HandshakeLoader /> : <>{children}</>;
 }
