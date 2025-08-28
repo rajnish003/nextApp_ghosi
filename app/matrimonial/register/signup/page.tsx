@@ -3,10 +3,8 @@
 import React, { useState, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FiEye, FiEyeOff } from 'react-icons/fi';  // Eye icons
-// import axioshelper from '../../../api/axios_helper';
-import axios from 'axios';
-
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { useAuthStore } from '@/_zustand/authStore';
 
 interface FormData {
   firstName: string;
@@ -22,7 +20,7 @@ interface FormErrors {
   passwordLength: boolean;
 }
 
-const SignuPage: React.FC = () => {
+const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -32,7 +30,6 @@ const SignuPage: React.FC = () => {
     otp: '',
   });
 
-
   const [errors, setErrors] = useState<FormErrors>({
     passwordMatch: false,
     passwordLength: false,
@@ -41,6 +38,8 @@ const SignuPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
+  // Get auth store methods
+  const { sendOtp, loading, error } = useAuthStore();
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -62,54 +61,44 @@ const SignuPage: React.FC = () => {
     }
   };
 
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+    e.preventDefault();
 
-  // handle submit and api call
-
-const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
-  e.preventDefault();
-
-  // Basic validations
-  if (formData.password.length < 8) {
-    setErrors(prev => ({ ...prev, passwordLength: true }));
-    return;
-  }
-
-  if (formData.password !== formData.confirmPassword) {
-    setErrors(prev => ({ ...prev, passwordMatch: true }));
-    return;
-  }
-
-  try{
- // Send OTP to email
-    await axioshelper.post('/send-otp', {
-      email: formData.email,
-    });
-
-    alert('Registration successful! OTP sent to your email.');
-
-    // Store form data in localStorage for OTP page
-    localStorage.setItem('signupData', JSON.stringify(formData));
-    localStorage.setItem('email', formData.email); // already used in OTP page
-
-    // Redirect to OTP or login page
-    router.push('/matrimonial/register/otp');
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-        console.error('Registration error:', err);
-        alert(err.response?.data?.message || 'Registration failed. Please try again.');
+    // Basic validations
+    if (formData.password.length < 8) {
+      setErrors(prev => ({ ...prev, passwordLength: true }));
+      return;
     }
-    
-  }
-};;
 
-  // const otpPageNavigate = (): void => {
-  //   router.push('/matrimonial/register/otp');
-  // };
+    if (formData.password !== formData.confirmPassword) {
+      setErrors(prev => ({ ...prev, passwordMatch: true }));
+      return;
+    }
+
+    try {
+      // First, send OTP
+      await sendOtp(
+        formData.email,
+        () => {
+          // Store registration data temporarily
+          localStorage.setItem('signupData', JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            password: formData.password
+          }));
+          router.push("/matrimonial/register/otp");
+        }
+      );
+    } catch (err) {
+      console.error('OTP send error:', err);
+    }
+  };
+
+
 
   return (
     <div className="min-h-screen py-20 bg-gray-50 mt-2">
       <div className="max-w-5xl mx-auto flex bg-white shadow-md overflow-hidden rounded-2xl">
-
         {/* Image Section */}
         <div className="hidden lg:block h-auto lg:w-1/2 bg-cover bg-center">
           <Image
@@ -124,6 +113,13 @@ const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>): Promise<voi
         {/* Form Section */}
         <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
           <div className="w-full max-w-sm">
+            {/* Show error message from auth store */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+            )}
+
             <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-green-800 via-gray-500 to-green-800 text-transparent bg-clip-text">
               Create Account
             </h2>
@@ -230,9 +226,13 @@ const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>): Promise<voi
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className="text-white font-bold bg-gradient-to-r from-green-800 via-gray-500 to-green-800 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 rounded-lg text-sm w-full px-5 py-2.5 text-center"
+                  // onClick= {handleRegistration}
+                  disabled={loading}
+                  className={`text-white font-bold bg-gradient-to-r from-green-800 via-gray-500 to-green-800 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 rounded-lg text-sm w-full px-5 py-2.5 text-center ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  Sign up
+                  {loading ? 'Sending OTP...' : 'Sign up'}
                 </button>
               </div>
             </form>
@@ -240,7 +240,7 @@ const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>): Promise<voi
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{' '}
-                <a href="/login" className="font-medium text-green-600 hover:text-green-500">
+                <a href="/matrimonial/login" className="font-medium text-green-600 hover:text-green-500">
                   Sign in
                 </a>
               </p>
@@ -252,4 +252,4 @@ const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>): Promise<voi
   );
 };
 
-export default SignuPage;
+export default SignupPage;

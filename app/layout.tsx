@@ -5,6 +5,7 @@ import Navbar from "@/components/landing/Navbar";
 import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ClientWrapper from "@/components/loader/ClientWrapper";
+import { LoadingProvider } from "@/components/ui/LoadingProvider"; // Import the loading context provider
 
 
 const geistSans = Geist({
@@ -34,13 +35,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased` }>
+       
+        <LoadingProvider> {/* Wrap the application with LoadingProvider */}
         <Header />
         <Navbar />
         <ClientWrapper>     
           {children}
         </ClientWrapper>
         <Footer />
+         </LoadingProvider>
       </body>
     </html>
   );

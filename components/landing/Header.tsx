@@ -1,5 +1,5 @@
-import React from 'react';
-import Image from 'next/image';
+import React from "react";
+import Image from "next/image";
 
 const Header = () => {
   return (
@@ -12,24 +12,19 @@ const Header = () => {
 
       <div className="relative py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto gap-6">
-          {/* Logo Section */}
+          {/* ✅ Logo Section (always visible) */}
           <div className="flex items-center group">
-            <div className="relative h-10 w-10 md:h-20 md:w-21 rounded-full border-4 border-white shadow-md transform group-hover:rotate-12 transition-transform duration-300">
+            <div className="relative h-25 w-25 md:h-20 md:w-20 rounded-full border-4 border-white shadow-md transform group-hover:rotate-12 transition-transform duration-300">
               <Image
                 src="/image/logo.png"
                 alt="Ghoshi Community Logo"
                 layout="fill"
-                // objectFit="cover"
                 className="rounded-full"
               />
             </div>
-            {/* <div className="ml-4 hidden md:block">
-              <div className="text-xs font-medium text-white/80 tracking-wider">COMMUNITY</div>
-              <div className="text-xl font-bold text-white">GHOSHI</div>
-            </div> */}
           </div>
 
-          {/* Title Section */}
+          {/* ✅ Title Section */}
           <div className="text-center space-y-2">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white font-serif tracking-tight">
               Welcome to Ghosi Community
@@ -42,8 +37,8 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Profile/Right Section */}
-          <div className="relative group">
+          {/* ❌ Hide on mobile, ✅ show only on md+ screens */}
+          <div className="relative group hidden md:block">
             <div className="relative h-16 w-16 rounded-full border-3 border-white/80 shadow-lg overflow-hidden transition-all duration-300 group-hover:border-yellow-300 group-hover:scale-110">
               <Image
                 src="/image/logo.png"
