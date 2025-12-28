@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-// import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { toast } from 'react-hot-toast';
-// import { BASE_URL, endpoints } from '../app/services/apis';
+import { BASE_URL, endpoints } from '../app/services/apis';
 
 // ---------- Form Data Interface ----------
 interface FormData {
@@ -49,20 +49,20 @@ const initialFormState: FormData = {
 };
 
 // ---------- API Setup (Kept for future use) ----------
-// const apiConnector: AxiosInstance = axios.create({
-//   baseURL: BASE_URL,
-//   timeout: 15000,
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// });
+const apiConnector: AxiosInstance = axios.create({
+  baseURL: BASE_URL,
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 // ---------- API Response Type ----------
-// interface ApiResponse<T = unknown> {
-//   success: boolean;
-//   message: string;
-//   data?: T;
-// }
+interface ApiResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  data?: T;
+}
 
 // ---------- Zustand Store ----------
 export const useHelpFormStore = create<HelpFormState>()(
@@ -110,10 +110,7 @@ export const useHelpFormStore = create<HelpFormState>()(
 
         try {
           // ================ API CALLING IS COMMENTED OUT ================
-          // This section is temporarily disabled for development/testing
-          // Uncomment and adjust when you're ready to connect to the backend
-
-          /*
+                  
           // Client-side validation examples (uncomment as needed)
           if (!formData.name.trim()) {
             throw new Error('Full name is required');
@@ -131,17 +128,17 @@ export const useHelpFormStore = create<HelpFormState>()(
           }
 
           // Simulate API call
-          // const response = await apiConnector.post<ApiResponse>(
-          //   endpoints.HELP_FORM_API,
-          //   formData
-          // );
+          const response = await apiConnector.post<ApiResponse>(
+            endpoints.HELP_FORM_API,
+            formData
+          );
 
-          // if (!response.data.success) {
-          //   throw new Error(response.data.message || 'Submission failed');
-          // }
+          if (!response.data.success) {
+            throw new Error(response.data.message || 'Submission failed');
+          }
 
           // Success (mocked)
-          */
+        
 
           // ------------------- MOCK SUCCESS FOR TESTING -------------------
           // Remove this block when real API is enabled

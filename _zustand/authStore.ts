@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axios, { AxiosInstance } from "axios";
-import { endpoints,BASE_URL } from '../app/services/apis';
+import { endpoints, BASE_URL } from '../app/services/apis';
 
 // Create API connector instance
 const apiConnector: AxiosInstance = axios.create({
@@ -79,10 +79,10 @@ interface AuthState {
   register: (userData: RegisterFormData, navigate?: (path: string) => void) => Promise<void>;
   login: (credentials: LoginCredentials, navigate?: (path: string) => void) => Promise<void>;
   logout: (navigate?: (path: string) => void) => void;
-  refreshToken: () => Promise<void>;
   checkAuthStatus: () => void;
 }
 
+// Zustand Store
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -106,22 +106,19 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true, error: null, success: null });
 
-          const response = await apiConnector.post<ApiResponse<OtpResponse>>(endpoints.SENDOTP_API, {
-            email,
-            checkUserPresent: true,
-          });
+          const response = await apiConnector.post<ApiResponse<OtpResponse>>(
+            endpoints.SENDOTP_API,
+            { email, checkUserPresent: true }
+          );
 
-          if (!response.data.success) {
-            throw new Error(response.data.message);
-          }
+          if (!response.data.success) throw new Error(response.data.message);
 
           localStorage.setItem('email', email);
           const successMessage = "OTP sent successfully! Please check your email.";
           toast.success(successMessage);
           set({ success: successMessage });
-          
-          if (navigate) navigate("/matrimonial/register/otp");
 
+          navigate("/matrimonial/register/otp");
         } catch (error) {
           const err = error as ErrorResponse;
           const errorMessage = err.response?.data?.message || err.message || 'Failed to send OTP';
@@ -140,21 +137,15 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true, error: null, success: null });
 
-          const response = await apiConnector.post<ApiResponse<OtpResponse>>(endpoints.VERIFYOTP_API, {
-            email,
-            otp,
-          });
+          const response = await apiConnector.post<ApiResponse<OtpResponse>>(
+            endpoints.VERIFYOTP_API,
+            { email, otp }
+          );
 
-          if (!response.data.success) {
-            throw new Error(response.data.message);
-          }
+          if (!response.data.success) throw new Error(response.data.message);
 
-          const successMessage = "OTP verified successfully!";
-          toast.success(successMessage);
-          set({ success: successMessage });
-          
+          toast.success("OTP verified successfully!");
           if (navigate) navigate("/matrimonial/register/complete-profile");
-
         } catch (error) {
           const err = error as ErrorResponse;
           const errorMessage = err.response?.data?.message || err.message || 'OTP verification failed';
@@ -183,20 +174,23 @@ export const useAuthStore = create<AuthState>()(
             password: userData.password,
           };
 
-          const response = await apiConnector.post<ApiResponse<AuthResponse>>(endpoints.SIGNUP_API, apiData);
+          const response = await apiConnector.post<ApiResponse<AuthResponse>>(
+            endpoints.SIGNUP_API,
+            apiData
+          );
 
-          if (!response.data.success) {
-            throw new Error(response.data.message);
-          }
+          if (!response.data.success) throw new Error(response.data.message);
 
           const { user, token } = response.data.data!;
-          const successMessage = "Registration successful!";
-          
-          toast.success(successMessage);
-          set({ user, token, isAuthenticated: true, success: successMessage });
+          toast.success("Registration successful!");
+          set({
+            user,
+            token,
+            isAuthenticated: true,
+            success: "Account created successfully!",
+          });
 
           if (navigate) navigate("/dashboard");
-
         } catch (error) {
           const err = error as ErrorResponse;
           const errorMessage = err.response?.data?.message || err.message || 'Registration failed';
@@ -215,23 +209,26 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true, error: null, success: null });
 
-          const response = await apiConnector.post<ApiResponse<AuthResponse>>(endpoints.LOGIN_API, {
-            email: credentials.email.trim(),
-            password: credentials.password,
-          });
+          const response = await apiConnector.post<ApiResponse<AuthResponse>>(
+            endpoints.LOGIN_API,
+            {
+              email: credentials.email.trim(),
+              password: credentials.password,
+            }
+          );
 
-          if (!response.data.success) {
-            throw new Error(response.data.message);
-          }
+          if (!response.data.success) throw new Error(response.data.message);
 
           const { user, token } = response.data.data!;
-          const successMessage = `Welcome back, ${user.name}!`;
-          
-          toast.success(successMessage);
-          set({ user, token, isAuthenticated: true, success: successMessage });
+          toast.success(`Welcome back, ${user.name}!`);
+          set({
+            user,
+            token,
+            isAuthenticated: true,
+            success: "Logged in successfully!",
+          });
 
           if (navigate) navigate("/dashboard");
-
         } catch (error) {
           const err = error as ErrorResponse;
           const errorMessage = err.response?.data?.message || err.message || 'Login failed';
@@ -246,41 +243,19 @@ export const useAuthStore = create<AuthState>()(
 
       // Logout user
       logout: (navigate) => {
-        set({ 
-          user: null, 
-          token: null, 
-          isAuthenticated: false, 
-          error: null, 
-          success: "Logged out successfully!" 
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          error: null,
+          success: "Logged out successfully!",
         });
-        
         toast.success("Logged out successfully!");
+        localStorage.removeItem('email'); // optional cleanup
         if (navigate) navigate("/login");
       },
 
-      // Refresh token
-      refreshToken: async () => {
-        try {
-          const currentToken = get().token;
-          if (!currentToken) return;
-
-          const response = await apiConnector.post<ApiResponse<{ token: string }>>(
-            endpoints.REFRESH_TOKEN_API,
-            { token: currentToken }
-          );
-
-          if (response.data.success && response.data.data) {
-            set({ token: response.data.data.token });
-          } else {
-            get().logout();
-          }
-        } catch (error) {
-          console.error("Token refresh failed:", error);
-          get().logout();
-        }
-      },
-
-      // Check auth status
+      // Check if user is authenticated (useful on app reload)
       checkAuthStatus: () => {
         const { token, user } = get();
         set({ isAuthenticated: !!(token && user) });
@@ -289,19 +264,19 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ 
-        user: state.user, 
-        token: state.token, 
-        isAuthenticated: state.isAuthenticated 
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
       }),
     }
   )
 );
 
-// Auth hook
+// Custom hook for cleaner usage
 export const useAuth = () => {
   const store = useAuthStore();
-  
+
   useEffect(() => {
     store.checkAuthStatus();
   }, [store]);

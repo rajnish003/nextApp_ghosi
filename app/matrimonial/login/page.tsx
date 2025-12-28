@@ -26,7 +26,7 @@ export default function LoginPage() {
         email: formData.email,
         password: formData.password,
       },
-      () => router.push("/dashboard")
+      () => router.replace("/dashboard")
     );
   };
 

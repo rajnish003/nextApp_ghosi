@@ -15,6 +15,7 @@ export const endpoints = {
   RESETPASSWORD_API: `/auth/reset-password`,
   BECOME_A_MEMBER_API: `/become-a-member`,
   HELP_FORM_API:`/help-form`,
+  VERIFYOTP_API: `/verify-otp`,
 
   // Admin
   ADMIN_LOGIN_API: `/admin`,
