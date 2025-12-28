@@ -3,11 +3,11 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
+// import Swal from 'sweetalert2';
+// import withReactContent from 'sweetalert2-react-content';
 // import { endpoints } from '../../services/apis';
 
-const MySwal = withReactContent(Swal);
+// const MySwal = withReactContent(Swal);
 
 interface AdminLoginData {
   email: string;
@@ -44,6 +44,11 @@ const AdminLogin: React.FC = () => {
       localStorage.setItem("adminToken", "dummy-admin-token");
       localStorage.setItem("adminEmail", formData.email);
 
+       // ✅ Dynamic client-only import
+    const Swal = (await import("sweetalert2")).default;
+    const withReactContent = (await import("sweetalert2-react-content")).default;
+    const MySwal = withReactContent(Swal);
+
       await MySwal.fire({
         title: 'Login Successful!',
         text: 'Welcome back, Admin!',
@@ -65,12 +70,8 @@ const AdminLogin: React.FC = () => {
       
       setError(errorMessage);
       
-      await MySwal.fire({
-        title: 'Login Failed!',
-        text: errorMessage,
-        icon: 'error',
-        confirmButtonText: 'Try Again',
-      });
+    const Swal = (await import("sweetalert2")).default;
+    Swal.fire("Error", "Login failed", "error");
     } finally {
       setLoading(false);
     }
