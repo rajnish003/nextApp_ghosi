@@ -5,7 +5,7 @@ import { FiUpload, FiPhone, FiBookOpen } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { useHelpFormStore } from "@/_zustand/helpFormStore";
 
-// Move translations to a separate file in a real project for maintainability
+// Translations object (same as before)
 const translations = {
   en: {
     title: "How Can We Help You?",
@@ -101,7 +101,7 @@ interface HelpFormData {
   description: string;
   urgency: string;
   attachments: File | null;
-  contactMethod: "phone" | "email";
+  contactMethod: "phone" | "email" | ""; // Allow empty initial state
   phone: string;
   preferredTime: string;
 }
@@ -115,12 +115,19 @@ const Help: React.FC = () => {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    if (type === 'file') {
-      const fileInput = e.target as HTMLInputElement;
-      const file = fileInput.files?.[0] || null;
-      updateField(name, file);
+
+    if (type === "file") {
+      const input = e.target as HTMLInputElement;
+      const file = input.files?.[0] || null;
+      // Optional: Add file size validation (5MB = 5 * 1024 * 1024 bytes)
+      if (file && file.size > 5 * 1024 * 1024) {
+        alert("File size must be less than 5MB");
+        input.value = ""; // Clear input
+        return;
+      }
+      updateField(name as keyof HelpFormData, file);
     } else {
-      updateField(name, value);
+      updateField(name as keyof HelpFormData, value);
     }
   };
 
@@ -173,59 +180,53 @@ const Help: React.FC = () => {
 
           {/* Form Body */}
           <div className="p-6 space-y-8">
-            {/* Contact Information */}
+            {/* Your Information */}
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-green-700">{t.yourInfo}</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                     {t.fullName} <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="name"
                     name="name"
-                    value={formData.name}
+                    type="text"
+                    value={formData.name || ""}
                     onChange={handleChange}
                     required
-                    aria-required="true"
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                     {t.email} <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="email"
                     name="email"
                     type="email"
-                    value={formData?.email || ""}
+                    value={formData.email || ""}
                     onChange={handleChange}
                     required
-                    aria-required="true"
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
               </div>
 
+              {/* Contact Method */}
               <div>
-                <span className="block text-sm font-medium text-gray-700">
+                <span className="block text-sm font-medium text-gray-700 mb-2">
                   {t.contactMethod} <span className="text-red-500">*</span>
                 </span>
-                <div className="mt-2 flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-6">
                   <label className="inline-flex items-center">
                     <input
                       type="radio"
                       name="contactMethod"
                       value="email"
+                      checked={formData.contactMethod === "email"}
                       onChange={handleChange}
-                      checked={formData?.contactMethod === "email"}
                       className="text-green-600 focus:ring-green-500"
                     />
                     <span className="ml-2">{t.email}</span>
@@ -235,29 +236,26 @@ const Help: React.FC = () => {
                       type="radio"
                       name="contactMethod"
                       value="phone"
+                      checked={formData.contactMethod === "phone"}
                       onChange={handleChange}
-                      checked={formData?.contactMethod === "phone"}
                       className="text-green-600 focus:ring-green-500"
                     />
                     <span className="ml-2">{t.phone}</span>
                   </label>
                 </div>
-                {formData?.contactMethod === "phone" && (
-                  <div className="mt-3">
-                    <label
-                      htmlFor="phone"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+
+                {formData.contactMethod === "phone" && (
+                  <div className="mt-4">
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                       {t.phone} <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="phone"
                       name="phone"
                       type="tel"
-                      value={formData?.phone || ""}
+                      value={formData.phone || ""}
                       onChange={handleChange}
-                      required
-                      aria-required="true"
+                      required={formData.contactMethod === "phone"}
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-green-500 focus:border-green-500"
                     />
                   </div>
@@ -270,36 +268,29 @@ const Help: React.FC = () => {
               <h3 className="text-xl font-semibold text-green-700">{t.issueDetails}</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
                     {t.subject} <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="subject"
                     name="subject"
-                    value={formData?.subject || ""}
+                    type="text"
+                    value={formData.subject || ""}
                     onChange={handleChange}
                     required
-                    aria-required="true"
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="issueType"
-                    className="block text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="issueType" className="block text-sm font-medium text-gray-700">
                     {t.issueType} <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="issueType"
                     name="issueType"
-                    value={formData?.issueType || ""}
+                    value={formData.issueType || ""}
                     onChange={handleChange}
                     required
-                    aria-required="true"
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-green-500 focus:border-green-500"
                   >
                     <option value="">{t.selectHelp}</option>
@@ -312,88 +303,78 @@ const Help: React.FC = () => {
                 </div>
               </div>
 
+              {/* Urgency Level */}
               <div>
-                <span className="block text-sm font-medium text-gray-700">
-                  {t.urgency}
-                </span>
-                <div className="mt-2 flex flex-wrap gap-4">
+                <span className="block text-sm font-medium text-gray-700 mb-2">{t.urgency}</span>
+                <div className="flex flex-wrap gap-6">
                   {["low", "medium", "high", "critical"].map((level) => (
                     <label key={level} className="inline-flex items-center">
                       <input
                         type="radio"
                         name="urgency"
                         value={level}
+                        checked={formData.urgency === level}
                         onChange={handleChange}
-                        checked={formData?.urgency === level}
                         className="text-green-600 focus:ring-green-500"
                       />
-                      <span className="ml-2">{t[level as keyof typeof t]}</span>
+                      <span className="ml-2 capitalize">{t[level as keyof typeof t]}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
+              {/* Description */}
               <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                   {t.description} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   id="description"
                   name="description"
-                  value={formData?.description || ""}
+                  value={formData.description || ""}
                   onChange={handleChange}
                   rows={5}
                   required
-                  aria-required="true"
                   placeholder={t.descriptionPH}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-green-500 focus:border-green-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-green-500 focus:border-green-500 resize-vertical"
                 />
               </div>
 
+              {/* Attachments */}
               <div>
-                <label
-                  htmlFor="attachments"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  {t.attach}
-                </label>
-                <div className="mt-2 flex items-center gap-3">
-                  <label className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md cursor-pointer hover:bg-green-700 transition">
-                    <FiUpload className="mr-2" />
-                    {t.attach}
+                <label className="block text-sm font-medium text-gray-700">{t.attach}</label>
+                <div className="mt-2 flex items-center gap-4">
+                  <label className="flex items-center justify-center px-5 py-3 bg-green-600 text-white rounded-md cursor-pointer hover:bg-green-700 transition text-sm">
+                    <FiUpload className="mr-2 text-lg" />
+                    Upload File
                     <input
                       id="attachments"
                       name="attachments"
                       type="file"
+                      accept="image/*,.pdf,.doc,.docx"
                       onChange={handleChange}
                       className="hidden"
-                      aria-label={t.attach}
                     />
                   </label>
-                  {formData?.attachments && (
-                    <span className="text-sm text-gray-600 truncate w-full sm:max-w-[200px]">
-                      {(formData.attachments as File).name}
+                  {formData.attachments && (
+                    <span className="text-sm text-gray-700 truncate max-w-xs">
+                      {formData.attachments.name}
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-xs text-gray-500">{t.attachNote}</p>
+                <p className="mt-2 text-xs text-gray-500">{t.attachNote}</p>
               </div>
 
+              {/* Preferred Contact Time */}
               <div>
-                <label
-                  htmlFor="preferredTime"
-                  className="block text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="preferredTime" className="block text-sm font-medium text-gray-700">
                   {t.preferredTime}
                 </label>
                 <input
                   id="preferredTime"
                   name="preferredTime"
                   type="text"
-                  value={formData?.preferredTime || ""}
+                  value={formData.preferredTime || ""}
                   onChange={handleChange}
                   placeholder={t.bestTimePH}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-green-500 focus:border-green-500"
@@ -401,22 +382,26 @@ const Help: React.FC = () => {
               </div>
             </div>
 
-            {/* Form Submission */}
-            <div className="pt-6">
+            {/* Submit Button */}
+            <div className="pt-8 border-t border-gray-200">
               {success ? (
-                <div className="bg-green-100 bAorder border-green-400 text-green-700 px-4 py-3 rounded">
+                <div className="bg-green-50 border border-green-300 text-green-800 px-6 py-4 rounded-lg text-center">
                   {t.success}
                 </div>
               ) : error ? (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div className="bg-red-50 border border-red-300 text-red-800 px-6 py-4 rounded-lg text-center">
                   {t.error}
                 </div>
-              ) : (
+              ) : null}
+
+              {!success && (
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full py-3 px-4 rounded-md shadow-sm text-lg font-medium text-white bg-green-600 hover:bg-green-700 transition ${
-                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  className={`w-full mt-6 py-4 px-6 rounded-lg text-lg font-semibold text-white transition ${
+                    loading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700 shadow-lg"
                   }`}
                 >
                   {loading ? t.submitting : t.submit}
@@ -426,35 +411,35 @@ const Help: React.FC = () => {
           </div>
         </form>
 
-        {/* Other Help Options */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-semibold text-green-800 mb-4">{t.otherWays}</h3>
-          <div className="grid md:grid-cols-3 gap-6 text-center">
+        {/* Other Ways to Get Help */}
+        <div className="mt-12 bg-white rounded-2xl shadow-lg p-8">
+          <h3 className="text-2xl font-bold text-green-800 mb-6 text-center">{t.otherWays}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <a
               href="tel:+911234567890"
-              className="flex flex-col items-center hover:text-green-600 transition"
+              className="flex flex-col items-center text-center hover:text-green-600 transition group"
             >
-              <FiPhone className="text-green-600 text-2xl mb-2" />
-              <h4 className="font-medium">{t.call}</h4>
-              <p className="text-sm">+91 1234567890</p>
+              <FiPhone className="text-4xl text-green-600 mb-4 group-hover:scale-110 transition" />
+              <h4 className="font-semibold text-lg">{t.call}</h4>
+              <p className="text-sm text-gray-600 mt-1">+91 12345 67890</p>
             </a>
             <a
               href="https://wa.me/911234567890"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center hover:text-green-600 transition"
+              className="flex flex-col items-center text-center hover:text-green-600 transition group"
             >
-              <FaWhatsapp className="text-green-500 text-2xl mb-2" />
-              <h4 className="font-medium">{t.whatsapp}</h4>
-              <p className="text-sm">{t.startChat}</p>
+              <FaWhatsapp className="text-4xl text-green-500 mb-4 group-hover:scale-110 transition" />
+              <h4 className="font-semibold text-lg">{t.whatsapp}</h4>
+              <p className="text-sm text-gray-600 mt-1">{t.startChat}</p>
             </a>
             <a
-              href="#"
-              className="flex flex-col items-center hover:text-green-600 transition"
+              href="/knowledge-base"
+              className="flex flex-col items-center text-center hover:text-green-600 transition group"
             >
-              <FiBookOpen className="text-green-700 text-2xl mb-2" />
-              <h4 className="font-medium">{t.knowledge}</h4>
-              <p className="text-sm">{t.browse}</p>
+              <FiBookOpen className="text-4xl text-green-700 mb-4 group-hover:scale-110 transition" />
+              <h4 className="font-semibold text-lg">{t.knowledge}</h4>
+              <p className="text-sm text-gray-600 mt-1">{t.browse}</p>
             </a>
           </div>
         </div>

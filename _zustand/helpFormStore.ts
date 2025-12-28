@@ -1,25 +1,25 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+// import axios, { AxiosError, AxiosInstance } from 'axios';
 import { toast } from 'react-hot-toast';
-import { BASE_URL, endpoints } from '../app/services/apis';
+// import { BASE_URL, endpoints } from '../app/services/apis';
 
 // ---------- Form Data Interface ----------
 interface FormData {
-   name: "",
-  email: "",
-  subject: "",
-  issueType: "",
-  description: "",
-  urgency: "medium",
-  attachments: null,
-  contactMethod: "phone",
-  phone: "",
-  preferredTime: "",
+  name: string;
+  email: string;
+  subject: string;
+  issueType: string;
+  description: string;
+  urgency: "low" | "medium" | "high" | "critical";
+  attachments: File | null;
+  contactMethod: "phone" | "email" | "";
+  phone: string;
+  preferredTime: string;
 }
 
 // ---------- Store State Interface ----------
-interface MemberFormState {
+interface HelpFormState {
   formData: FormData;
   loading: boolean;
   error: string | null;
@@ -43,29 +43,29 @@ const initialFormState: FormData = {
   description: "",
   urgency: "medium",
   attachments: null,
-  contactMethod: "phone",
+  contactMethod: "",
   phone: "",
   preferredTime: "",
 };
 
-// ---------- API Setup ----------
-const apiConnector: AxiosInstance = axios.create({
-  baseURL: BASE_URL,
-  timeout: 15000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+// ---------- API Setup (Kept for future use) ----------
+// const apiConnector: AxiosInstance = axios.create({
+//   baseURL: BASE_URL,
+//   timeout: 15000,
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
 
 // ---------- API Response Type ----------
-interface ApiResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data?: T;
-}
+// interface ApiResponse<T = unknown> {
+//   success: boolean;
+//   message: string;
+//   data?: T;
+// }
 
 // ---------- Zustand Store ----------
-export const useHelpFormStore = create<MemberFormState>()(
+export const useHelpFormStore = create<HelpFormState>()(
   persist(
     (set, get) => ({
       // State
@@ -75,27 +75,24 @@ export const useHelpFormStore = create<MemberFormState>()(
       success: null,
 
       // Actions
-      updateField: (field, value) => {
+      updateField: (field, value) =>
         set((state) => ({
           formData: {
             ...state.formData,
-            [field]: value
-          }
-        }));
-      },
+            [field]: value,
+          },
+        })),
 
       resetForm: () => {
         set({
           formData: initialFormState,
           error: null,
-          success: null
+          success: null,
         });
         toast.success('Form reset successfully');
       },
 
-      setLoading: (status) => {
-        set({ loading: status });
-      },
+      setLoading: (status) => set({ loading: status }),
 
       setError: (message) => {
         set({ error: message });
@@ -112,64 +109,73 @@ export const useHelpFormStore = create<MemberFormState>()(
         set({ loading: true, error: null, success: null });
 
         try {
-          // Basic validation
-          if (!formData.name|| !formData.phone) {
-            throw new Error('Please fill in all required fields');
+          // ================ API CALLING IS COMMENTED OUT ================
+          // This section is temporarily disabled for development/testing
+          // Uncomment and adjust when you're ready to connect to the backend
+
+          /*
+          // Client-side validation examples (uncomment as needed)
+          if (!formData.name.trim()) {
+            throw new Error('Full name is required');
           }
 
-        //   // Email validation
-        //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        //   if (!emailRegex.test(formData.email)) {
-        //     throw new Error('Please enter a valid email address');
-        //   }
-
-          // Mobile validation
-          const mobileRegex = /^\d{10}$/;
-          if (!mobileRegex.test(formData.phone)) {
-            throw new Error('Please enter a valid 10-digit mobile number');
+          if (formData.contactMethod === 'phone' && !formData.phone.trim()) {
+            throw new Error('Phone number is required');
           }
 
-          // API call
-          const response = await apiConnector.post<ApiResponse>(
-            endpoints.HELP_FORM_API,
-            formData
-          );
-
-          if (!response.data.success) {
-            throw new Error(response.data.message || 'Submission failed');
+          if (formData.contactMethod === 'phone') {
+            const mobileRegex = /^\d{10}$/;
+            if (!mobileRegex.test(formData.phone.replace(/\s/g, ''))) {
+              throw new Error('Please enter a valid 10-digit phone number');
+            }
           }
+
+          // Simulate API call
+          // const response = await apiConnector.post<ApiResponse>(
+          //   endpoints.HELP_FORM_API,
+          //   formData
+          // );
+
+          // if (!response.data.success) {
+          //   throw new Error(response.data.message || 'Submission failed');
+          // }
+
+          // Success (mocked)
+          */
+
+          // ------------------- MOCK SUCCESS FOR TESTING -------------------
+          // Remove this block when real API is enabled
+          await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate delay
 
           set({
-            success: 'Form submitted successfully!',
+            success: 'Form submitted successfully! (Mock mode)',
             loading: false,
-            formData: initialFormState
+            formData: initialFormState, // Reset form after success
           });
 
-          toast.success('Form submitted successfully!');
+          toast.success('Thank you! Your request has been submitted.');
+
+          // ================ END OF COMMENTED API SECTION ================
         } catch (err) {
           let errorMessage = 'Failed to submit form. Please try again.';
 
-          if (err instanceof AxiosError) {
-            errorMessage = err.response?.data?.message || err.message;
-          } else if (err instanceof Error) {
+          if (err instanceof Error) {
             errorMessage = err.message;
           }
 
           set({
             error: errorMessage,
-            loading: false
+            loading: false,
           });
 
           toast.error(errorMessage);
         }
-      }
+      },
     }),
     {
-      name: 'Help-form-storage',
+      name: 'help-form-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        formData: state.formData
-      })
+      partialize: (state) => ({ formData: state.formData }),
     }
   )
 );
