@@ -31,6 +31,7 @@ const LoadingLink: React.FC<LoadingLinkProps> = ({ href, children, className, on
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+       e.preventDefault();
       if (href !== pathname) {
         startLoading();
       }
@@ -159,36 +160,34 @@ const Navbar: React.FC = () => {
       {/* Mobile Menu */}
      {/* Mobile Menu */}
 {open && (
-  <div className="lg:hidden bg-white shadow-lg">
+<div className="lg:hidden bg-white shadow-lg border-t border-gray-200">
     <div className="px-2 pt-2 pb-4 space-y-1">
       {menus.map((menu, index) => (
         <div key={index} className="border-b border-gray-100 last:border-0">
           {menu.dropdown ? (
-            <>
-              <details className="group">
-                <summary className="flex justify-between items-center px-3 py-3 text-gray-700 font-medium cursor-pointer hover:text-green-500 list-none">
-                  {menu.name}
-                  <SlArrowDown className="text-xs transition-transform duration-200 group-open:rotate-180" />
-                </summary>
-                <div className="pl-4 pb-2 space-y-2">
-                  {menu.dropdown.map((item, subIndex) => (
-                    <LoadingLink
-                      key={subIndex}
-                      href={item.link}
-                      className="block px-3 py-2 text-sm text-gray-600 hover:bg-green-50 hover:text-green-600 rounded"
-                      onClick={() => setOpen(false)}   
-                    >
-                      {item.name}
-                    </LoadingLink>
-                  ))}
-                </div>
-              </details>
-            </>
+            <details className="group">
+              <summary className="flex justify-between items-center px-3 py-3 text-gray-700 font-medium cursor-pointer hover:text-green-500 list-none">
+                {menu.name}
+                <SlArrowDown className="text-xs transition-transform duration-200 group-open:rotate-180" />
+              </summary>
+              <div className="pl-4 pb-2 space-y-2">
+                {menu.dropdown.map((item, subIndex) => (
+                  <LoadingLink
+                    key={subIndex}
+                    href={item.link}
+                    className="block px-3 py-2 text-sm text-gray-600 hover:bg-green-50 hover:text-green-600 rounded"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.name}
+                  </LoadingLink>
+                ))}
+              </div>
+            </details>
           ) : (
             <LoadingLink
               href={menu.link || "#"}
               className="block px-3 py-3 text-gray-700 hover:text-green-500 font-medium"
-              onClick={() => setOpen(false)}  
+              onClick={() => setOpen(false)}
             >
               {menu.name}
             </LoadingLink>
@@ -196,18 +195,18 @@ const Navbar: React.FC = () => {
         </div>
       ))}
 
-      <div className="pt-2 space-y-2">
+      <div className="pt-4 space-y-3">
         <LoadingLink
           href="/admin/login"
-          className="w-full block text-left px-3 py-2 border border-green-500 text-green-600 rounded-md hover:bg-green-50"
-          onClick={() => setOpen(false)}  
+          className="w-full block text-center px-4 py-2 border border-green-500 text-green-600 rounded-md hover:bg-green-50"
+          onClick={() => setOpen(false)}
         >
           Admin Login
         </LoadingLink>
         <LoadingLink
           href="/becomeMember"
-          className="w-full block text-left px-3 py-2 border border-green-500 text-red-500 rounded-md hover:bg-green-50 font-medium"
-          onClick={() => setOpen(false)}  
+          className="w-full block text-center px-4 py-2 border border-green-500 text-red-500 rounded-md hover:bg-green-50 font-medium"
+          onClick={() => setOpen(false)}
         >
           Become a Member
         </LoadingLink>

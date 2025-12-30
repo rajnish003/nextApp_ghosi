@@ -62,12 +62,16 @@ export default function ProfileMatch() {
     { label: "English", value: "english" },
   ];
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/users")
-      .then((response) => setAllUsers(response.data))
-      .catch((error) => console.error("Error fetching users:", error));
-  }, []);
+useEffect(() => {
+  axios
+    .get("https://dummyjson.com/users")
+    .then((response) => {
+      setAllUsers(response.data.users); // ⚠️ users is inside response.data
+    })
+    .catch((error) => {
+      console.error("Error fetching users:", error);
+    });
+}, []);
 
   const handleSearch = () => {
     const results = allUsers.filter((user) => {
