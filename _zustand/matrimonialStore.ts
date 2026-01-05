@@ -1,9 +1,9 @@
 // store/matrimonialStore.ts
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { toast } from 'react-hot-toast';
-import { apiConnector } from '../app/services/apiconnector';
-import { endpoints } from '../app/services/apis';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { toast } from "react-hot-toast";
+import { apiConnector } from "../app/services/apiconnector";
+import { endpoints } from "../app/services/apis";
 
 // Error response type
 interface ErrorResponse {
@@ -69,8 +69,14 @@ interface MatrimonialState {
   clearMessages: () => void;
 
   // Matrimonial actions
-  createProfile: (profileData: MatrimonialProfile, navigate?: (path: string) => void) => Promise<void>;
-  updateProfile: (profileData: Partial<MatrimonialProfile>, navigate?: (path: string) => void) => Promise<void>;
+  createProfile: (
+    profileData: MatrimonialProfile,
+    navigate?: (path: string) => void
+  ) => Promise<void>;
+  updateProfile: (
+    profileData: Partial<MatrimonialProfile>,
+    navigate?: (path: string) => void
+  ) => Promise<void>;
   deleteProfile: (navigate?: (path: string) => void) => Promise<void>;
   getMatches: (userId: number) => Promise<MatrimonialMatch[]>;
   setProfile: (profile: MatrimonialProfile | null) => void;
@@ -79,7 +85,7 @@ interface MatrimonialState {
 
 export const useMatrimonialStore = create<MatrimonialState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Initial state
       profile: null,
       matches: [],
@@ -89,44 +95,55 @@ export const useMatrimonialStore = create<MatrimonialState>()(
 
       // State management actions
       setLoading: (isLoading: boolean) => set({ loading: isLoading }),
-      
+
       setError: (errorMessage: string | null) => set({ error: errorMessage }),
-      
-      setSuccess: (successMessage: string | null) => set({ success: successMessage }),
-      
+
+      setSuccess: (successMessage: string | null) =>
+        set({ success: successMessage }),
+
       clearMessages: () => set({ error: null, success: null }),
 
       setProfile: (profile: MatrimonialProfile | null) => set({ profile }),
-      
+
       setMatches: (matches: MatrimonialMatch[]) => set({ matches }),
 
       // Create Matrimonial Profile
-      createProfile: async (profileData: MatrimonialProfile, navigate?: (path: string) => void) => {
+      createProfile: async (
+        profileData: MatrimonialProfile,
+        navigate?: (path: string) => void
+      ) => {
         const toastId = toast.loading("Creating matrimonial profile...");
-        
+
         try {
           set({ loading: true, error: null, success: null });
 
-          const response = await apiConnector<ApiResponse<{ profile: MatrimonialProfile }>>("POST", endpoints.CREATE_PROFILE_API, profileData as unknown as Record<string, unknown>);
+          const response = await apiConnector.post<
+            ApiResponse<{ profile: MatrimonialProfile }>
+          >(endpoints.CREATE_PROFILE_API, profileData);
 
           if (!response.data.success) {
-            throw new Error(response.data.message || "Failed to create profile");
+            throw new Error(
+              response.data.message || "Failed to create profile"
+            );
           }
 
           const successMessage = "Matrimonial profile created successfully!";
           toast.success(successMessage);
-          set({ success: successMessage, profile: response.data.data?.profile || null });
+          set({
+            success: successMessage,
+            profile: response.data.data?.profile || null,
+          });
 
           if (navigate) {
             navigate("/matrimonial/profile");
           }
-
         } catch (error) {
           console.error("CREATE PROFILE API ERROR:", error);
           const err = error as ErrorResponse;
-          const errorMessage = err.response?.data?.message || 
-                              err.message || 
-                              'Failed to create profile. Please try again.';
+          const errorMessage =
+            err.response?.data?.message ||
+            err.message ||
+            "Failed to create profile. Please try again.";
           toast.error(errorMessage);
           set({ error: errorMessage });
         } finally {
@@ -136,32 +153,42 @@ export const useMatrimonialStore = create<MatrimonialState>()(
       },
 
       // Update Matrimonial Profile
-      updateProfile: async (profileData: Partial<MatrimonialProfile>, navigate?: (path: string) => void) => {
+      updateProfile: async (
+        profileData: Partial<MatrimonialProfile>,
+        navigate?: (path: string) => void
+      ) => {
         const toastId = toast.loading("Updating matrimonial profile...");
-        
+
         try {
           set({ loading: true, error: null, success: null });
 
-          const response = await apiConnector<ApiResponse<{ profileDetails: MatrimonialProfile }>>("PUT", endpoints.UPDATE_PROFILE_API, profileData as unknown as Record<string, unknown>);
+          const response = await apiConnector.post<
+            ApiResponse<{ profile: MatrimonialProfile }>
+          >(endpoints.UPDATE_PROFILE_API, profileData);
 
           if (!response.data.success) {
-            throw new Error(response.data.message || "Failed to update profile");
+            throw new Error(
+              response.data.message || "Failed to update profile"
+            );
           }
 
           const successMessage = "Profile updated successfully!";
           toast.success(successMessage);
-          set({ success: successMessage, profile: response.data.data?.profileDetails || null });
+          set({
+            success: successMessage,
+            profile: response.data.data?.profile || null,
+          });
 
           if (navigate) {
             navigate("/matrimonial/profile");
           }
-
         } catch (error) {
           console.error("UPDATE PROFILE API ERROR:", error);
           const err = error as ErrorResponse;
-          const errorMessage = err.response?.data?.message || 
-                              err.message || 
-                              'Failed to update profile. Please try again.';
+          const errorMessage =
+            err.response?.data?.message ||
+            err.message ||
+            "Failed to update profile. Please try again.";
           toast.error(errorMessage);
           set({ error: errorMessage });
         } finally {
@@ -173,14 +200,18 @@ export const useMatrimonialStore = create<MatrimonialState>()(
       // Delete Matrimonial Profile
       deleteProfile: async (navigate?: (path: string) => void) => {
         const toastId = toast.loading("Deleting matrimonial profile...");
-        
+
         try {
           set({ loading: true, error: null, success: null });
 
-          const response = await apiConnector<ApiResponse>("DELETE", endpoints.DELETE_PROFILE_API);
+          const response = await apiConnector.post<
+            ApiResponse<{ profile: MatrimonialProfile }>
+          >(endpoints.DELETE_PROFILE_API);
 
           if (!response.data.success) {
-            throw new Error(response.data.message || "Failed to delete profile");
+            throw new Error(
+              response.data.message || "Failed to delete profile"
+            );
           }
 
           const successMessage = "Profile deletion scheduled successfully!";
@@ -190,13 +221,13 @@ export const useMatrimonialStore = create<MatrimonialState>()(
           if (navigate) {
             navigate("/matrimonial");
           }
-
         } catch (error) {
           console.error("DELETE PROFILE API ERROR:", error);
           const err = error as ErrorResponse;
-          const errorMessage = err.response?.data?.message || 
-                              err.message || 
-                              'Failed to delete profile. Please try again.';
+          const errorMessage =
+            err.response?.data?.message ||
+            err.message ||
+            "Failed to delete profile. Please try again.";
           toast.error(errorMessage);
           set({ error: errorMessage });
         } finally {
@@ -210,7 +241,9 @@ export const useMatrimonialStore = create<MatrimonialState>()(
         try {
           set({ loading: true, error: null });
 
-          const response = await apiConnector<ApiResponse<MatrimonialMatch[]>>("GET", `${endpoints.GET_MATCHES_API}/${userId}`);
+          const response = await apiConnector.get<
+            ApiResponse<MatrimonialMatch[]>
+          >(`${endpoints.GET_MATCHES_API}/${userId}`);
 
           if (!response.data.success) {
             throw new Error(response.data.message || "Failed to fetch matches");
@@ -219,13 +252,13 @@ export const useMatrimonialStore = create<MatrimonialState>()(
           const matches = response.data.data || [];
           set({ matches });
           return matches;
-
         } catch (error) {
           console.error("GET MATCHES API ERROR:", error);
           const err = error as ErrorResponse;
-          const errorMessage = err.response?.data?.message || 
-                              err.message || 
-                              'Failed to fetch matches. Please try again.';
+          const errorMessage =
+            err.response?.data?.message ||
+            err.message ||
+            "Failed to fetch matches. Please try again.";
           toast.error(errorMessage);
           set({ error: errorMessage });
           return [];
@@ -235,11 +268,11 @@ export const useMatrimonialStore = create<MatrimonialState>()(
       },
     }),
     {
-      name: 'matrimonial-storage',
+      name: "matrimonial-storage",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ 
+      partialize: (state) => ({
         profile: state.profile,
-        matches: state.matches
+        matches: state.matches,
       }),
     }
   )
@@ -248,11 +281,11 @@ export const useMatrimonialStore = create<MatrimonialState>()(
 // Utility hook for matrimonial functionality
 export const useMatrimonial = () => {
   const store = useMatrimonialStore();
-  
+
   return {
     ...store,
     // Computed values
     hasProfile: !!store.profile,
     matchCount: store.matches.length,
   };
-}; 
+};

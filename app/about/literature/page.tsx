@@ -50,7 +50,7 @@ const page: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
-      <header className="bg-gradient-to-r from-gray-500 via-green-500 to-emerald-400 text-white text-center py-4 mb-6">
+      <header className="bg-linear-to-r from-gray-500 via-green-500 to-emerald-400 text-white text-center py-4 mb-6">
         <h1 className="text-3xl font-bold">Literature Collection</h1>
       </header>
 
