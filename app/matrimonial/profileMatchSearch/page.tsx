@@ -102,9 +102,9 @@ useEffect(() => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-green-50 to-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-green-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="bg-linear-to-r from-green-600 to-green-800 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex-1">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-4">
@@ -243,7 +243,7 @@ useEffect(() => {
                     className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 rounded-xl"
                   >
                     {/* Circular Image Container */}
-                    <div className="relative mx-auto mt-6 w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gradient-to-r from-green-500 to-green-700">
+                    <div className="relative mx-auto mt-6 w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-linear-to-r from-green-500 to-green-700">
                       {user.image ? (
                         <Image
                           src={user.image}
@@ -278,7 +278,7 @@ useEffect(() => {
                     <CardContent className="pb-4 space-y-2 px-6">
                       {user.profession && (
                         <div className="flex items-center">
-                          <Briefcase className="h-4 w-4 mr-2 text-green-600 flex-shrink-0" />
+                          <Briefcase className="h-4 w-4 mr-2 text-green-600 shrink-0" />
                           <p className="text-gray-700 truncate">
                             <span className="font-medium">Works as </span>
                             {user.profession}
@@ -287,7 +287,7 @@ useEffect(() => {
                       )}
                       {user.education && (
                         <div className="flex items-center">
-                          <GraduationCap className="h-4 w-4 mr-2 text-green-600 flex-shrink-0" />
+                          <GraduationCap className="h-4 w-4 mr-2 text-green-600 shrink-0" />
                           <p className="text-gray-700 truncate">
                             <span className="font-medium">Studied </span>
                             {user.education}
@@ -306,7 +306,7 @@ useEffect(() => {
                       </Button>
                       <Button
                         onClick={handleClick}
-                        className="bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 flex items-center gap-1"
+                        className="bg-linear-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 flex items-center gap-1"
                       >
                         View Profile <ArrowRightIcon className="h-4 w-4" />
                       </Button>
@@ -352,7 +352,7 @@ useEffect(() => {
               </div>
             )
           ) : (
-            <div className="text-center py-12 bg-gradient-to-br from-green-50 to-white rounded-xl border border-green-100">
+            <div className="text-center py-12 bg-linear-to-br from-green-50 to-white rounded-xl border border-green-100">
               <div className="mx-auto h-24 w-24 text-green-400 mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
