@@ -30,8 +30,7 @@ const LoadingLink: React.FC<LoadingLinkProps> = ({ href, children, className, on
   const pathname = usePathname();
 
   const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-       e.preventDefault();
+    () => {
       if (href !== pathname) {
         startLoading();
       }
