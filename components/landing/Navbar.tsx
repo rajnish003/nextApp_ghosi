@@ -82,7 +82,7 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3 md:py-4">
           {/* Logo Placeholder */}
-          <div className="flex-shrink-0"></div>
+          <div className="shrink-0"></div>
 
           {/* Mobile Menu Toggle */}
           <div className="flex lg:hidden items-center space-x-4">

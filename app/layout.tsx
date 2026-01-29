@@ -6,6 +6,7 @@ import Header from "@/components/landing/Header";
 import Footer from "@/components/landing/Footer";
 import ClientWrapper from "@/components/loader/ClientWrapper";
 import { LoadingProvider } from "@/components/ui/LoadingProvider"; // Import the loading context provider
+import Script from "next/dist/client/script";
 
 
 const geistSans = Geist({
@@ -35,6 +36,26 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+
+    <head>
+        {/* Google Analytics */}
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+        />
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
+      </head>
+
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased` }>
        
         <LoadingProvider> {/* Wrap the application with LoadingProvider */}

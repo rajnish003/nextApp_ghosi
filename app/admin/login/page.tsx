@@ -36,15 +36,15 @@ const AdminLogin: React.FC = () => {
       // Use the API endpoint from configuration
       // const response = await axios.post(endpoints.ADMIN_LOGIN_API, formData);
       
-      // // Store admin token from response
+      //  Store admin token from response
       // localStorage.setItem('adminToken', response.data.token);
       // localStorage.setItem('adminEmail', formData.email);
 
-        // ✅ TEMP AUTH (FOR REDIRECT TO WORK)
+        // TEMP AUTH (FOR REDIRECT TO WORK)
       localStorage.setItem("adminToken", "dummy-admin-token");
       localStorage.setItem("adminEmail", formData.email);
 
-       // ✅ Dynamic client-only import
+       // Dynamic client-only import
     const Swal = (await import("sweetalert2")).default;
     const withReactContent = (await import("sweetalert2-react-content")).default;
     const MySwal = withReactContent(Swal);
